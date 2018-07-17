@@ -1,6 +1,7 @@
-﻿# Title: SPOAllSitesAndSubsitesPlusOwners.ps1
+# Title: SPOAllSitesAndSubsitesPlusOwners.ps1
 #
-# This PowerShell script is to export a list of all of the sites and subsites and associated owners
+# This PowerShell script is for SharePoint Online Service and it can be used to export a list of
+# all of the sites and subsites and associated owners
 #
 # This script employs additional module called SharePointPnPPowerShellOnline, you can install that
 # from PS library using following command:
@@ -10,7 +11,7 @@
 # Distributed under GPLv3 license
 
 $credentials = Get-Credential
-$siteParent = "https://lazadagroup.sharepoint.com/sites/lex"
+$siteParent = <INPUT YOUR ROOT SPO SITE HERE>
 $outputPath = "C:\temp\AllSubsitegrouppermission.csv"
 
 function Get-SPOAllSitesAndSubsitesPlusOwners ($credentials,$siteParent) {
