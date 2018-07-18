@@ -6,8 +6,8 @@
 # all of the sites and subsites and associated owners
 #
 # NOTE:
-# If you have some standard for owner groups naming across all of your SPO sites - please adjust
-# the filter on line 43, or at least set it to "Sharing*" to filter out SharingLinks, or you will
+# If you have some naming standard for owner groups across all of your SPO sites - please adjust
+# the filter on line 52, or at least set it to "Sharing*" to filter out SharingLinks, or you will
 # have to iterate through all of the groups and sharing links an this will take forever!
 #
 # DEPENDENCY:
@@ -15,8 +15,13 @@
 # from PS online library using following command:
 #  > Install-Module SharePointPnPPowerShellOnline
 #
+# More info here:
+# https://docs.microsoft.com/en-us/powershell/sharepoint/sharepoint-pnp/sharepoint-pnp-cmdlets
+#
 # Author Mikhail Kostechuk
 # Distributed under GPLv3 license
+
+clear
 
 $credentials = Get-Credential
 
@@ -30,23 +35,27 @@ $site = $siteParent
 # Make sure the path set below exists
 $outputPath = "C:\temp\AllSubsitegrouppermission.csv"
 
+function Write-Log ($string) {
+    Write-Host (get-date).ToString('T'), $string
+}
+
 function Get-SPOAllSitesAndSubsitesPlusOwners ($credentials, $siteParent, $site, $groups) {
     Connect-PNPonline -Url $site -Credentials $credentials
     $result = @()
                  
     if ($groups.Count -eq 0) {
-        Write-Host "=============== Get-PNPGroup started"
+        Write-Log "=============== Get-PNPGroup started"
         $groups = Get-PNPGroup
-        Write-Host "=============== Get-PNPGroup done! Total groups in the list: ", $groups.Count
-        Write-Host "=============== Filtering out..."
+        Write-Log "=============== Get-PNPGroup done! Total groups in the list:", $groups.Count
+        Write-Log "=============== Filtering out..."
         # Group filter below
         $groups = $groups | Where-Object { $_.LoginName –Like "*wner*" }
-        Write-Host "=============== Filtering done! Total groups in the list: ", $groups.Count
+        Write-Log "=============== Filtering done! Total groups in the list:", $groups.Count
     }
 
     Write-Host ""
     Write-Host "--------------------------------------------"
-    Write-Host $site
+    Write-Log "=============== NEXT:", $site
     Write-Host ""
 
     $k = 0
@@ -93,22 +102,21 @@ function Get-SPOAllSitesAndSubsitesPlusOwners ($credentials, $siteParent, $site,
     Write-Host "--------------------------------------------"
 
     foreach ($rec in $result) {
-        Write-Host "SiteUrl: ", $rec.SiteUrl
-        Write-Host "Group Name: ", $rec.GroupName
-        Write-Host "Permission: ", $rec.Permission
-        Write-Host "Users in the grp: ", $rec.Users
+        Write-Log "Following data fetched for SiteUrl:", $rec.SiteUrl
+        Write-Host "Group Name:", $rec.GroupName
+        Write-Host "Permission:", $rec.Permission
+        Write-Host "Users in the grp:", $rec.Users
         Write-Host "--------------------------------------------"
     }   
+
+    $result | Export-Csv -Append -NoTypeInformation -Path $outputPath
 
     $subwebs = Get-PNPSubWebs
     if ($subwebs.Count -ne 0) {
         foreach ($nextSite in $subwebs) {
-            $result = $result + (Get-SPOAllSitesAndSubsitesPlusOwners $credentials $siteParent $nextSite.Url $groups)    
+            Get-SPOAllSitesAndSubsitesPlusOwners $credentials $siteParent $nextSite.Url $groups    
         }
     }
-
-    return $result
 }
 
-$result = Get-SPOAllSitesAndSubsitesPlusOwners $credentials $siteParent $site @()
-$result | Export-Csv -NoTypeInformation -Path $outputPath
+Get-SPOAllSitesAndSubsitesPlusOwners $credentials $siteParent $site @()
