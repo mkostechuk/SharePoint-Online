@@ -25,7 +25,7 @@ clear
 
 $credentials = Get-Credential
 
-# $siteParent should be an address to the site collection, it is used to grab groups
+# $siteParent should be an address of the site collection to grab site collection groups
 $siteParent = <PUT YOUR PARENT SPO SITE COLLECTION HERE>
 
 # $site is a starting point (root site) for the script, change this if you don't want to iterate
@@ -33,7 +33,7 @@ $siteParent = <PUT YOUR PARENT SPO SITE COLLECTION HERE>
 $site = $siteParent
 
 # Make sure the path set below exists
-$outputPath = "C:\temp\AllSubsitegrouppermission.csv"
+$outputPath = "C:\temp\full_list.csv"
 
 function Write-Log ($string) {
     Write-Host (get-date).ToString('T'), $string
